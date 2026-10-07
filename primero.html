@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargando Tienda...</title>
+  <link rel="stylesheet" href="WEB.css">
+</head>
+<body>
+
+  <!-- PANTALLA DE CARGA INICIAL -->
+  <div id="app-preloader" class="preloader">
+    <div class="spinner"></div>
+    <p>Cargando interfaz y productos...</p>
+  </div>
+
+  <!-- CONTROLES ADMIN FLOTANTES -->
+  <div class="admin-top-controls">
+    <button id="btn-admin-lock" class="admin-lock-btn" title="Acceso Administrador">🔒</button>
+    <button id="btn-admin-logout" class="admin-logout-btn hidden" title="Cerrar Sesión Admin">🚪 Salir Admin</button>
+  </div>
+
+  <!-- ENCABEZADO SUPERIOR RECTO Y COMPACTO (Logo a la Izquierda) -->
+  <header id="main-header" class="site-header compact-header">
+    <div class="header-brand-row">
+      <div id="logo-container" class="logo-frame">
+        <img id="site-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz4=" alt="Logo">
+      </div>
+      <div class="brand-text-col">
+        <h1 id="site-title" class="brand-title">...</h1>
+        <p id="site-announcement" class="brand-announcement"></p>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECCIÓN DE PROMOS / OFERTAS CENTRADAS -->
+  <section id="promos-section" class="promos-wrapper hidden">
+    <h2 class="section-heading">🔥 Ofertas Especiales</h2>
+    <div id="promos-container" class="promos-grid"></div>
+  </section>
+
+  <!-- SECCIONES / CATEGORÍAS -->
+  <nav id="sections-bar-wrapper" class="sections-nav-wrapper">
+    <div id="sections-bar" class="sections-bar"></div>
+  </nav>
+
+  <!-- CATÁLOGO DE PRODUCTOS -->
+  <main class="catalog-main">
+    <div id="products-grid" class="products-grid"></div>
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="site-footer">
+    <p>© Todos los derechos reservados.</p>
+    <p>Creado por <a id="creator-wa-link" href="https://wa.me/5493810000000" target="_blank" class="creator-link">Gabriel Cruz</a></p>
+  </footer>
+
+  <!-- BARRA INFERIOR FIJA -->
+  <nav id="bottom-fixed-nav" class="bottom-nav">
+    <button id="btn-bottom-menu" class="nav-action">
+      <span class="icon">☰</span>
+      <span class="label">SECCIONES - DATOS</span>
+    </button>
+
+    <button id="btn-bottom-cart" class="nav-action cart-center-btn">
+      🛒 <span id="cart-badge-count" class="badge">0</span>
+    </button>
+
+    <a id="btn-bottom-faq" href="#" target="_blank" class="nav-action">
+      <span class="icon">❓</span>
+      <span class="label">CONTACTO - DUDAS</span>
+    </a>
+  </nav>
+
+  <!-- MENÚ DESPLEGABLE HACIA ARRIBA (SLIDE UP) -->
+  <div id="menu-drawer" class="drawer-overlay hidden">
+    <div class="drawer-sheet">
+      <div class="drawer-header">
+        <h3>Menú de Navegación</h3>
+        <button id="btn-close-drawer" class="close-x">&times;</button>
+      </div>
+      <ul id="drawer-menu-list" class="drawer-links"></ul>
+    </div>
+  </div>
+
+  <!-- MODAL CANTIDAD -->
+  <div id="modal-quantity" class="modal-overlay hidden">
+    <div class="modal-box">
+      <button id="btn-close-qty-modal" class="close-x">&times;</button>
+      <h3 id="qty-modal-title">Nombre del Producto</h3>
+      <p id="qty-modal-desc" class="text-sub"></p>
+
+      <div class="price-info-card">
+        <div>Minorista: <strong id="qty-modal-retail-price">$0</strong></div>
+        <div id="qty-modal-wholesale-info" class="wholesale-highlight">Mayorista: $0 (Llevando X u.)</div>
+      </div>
+
+      <div class="qty-input-group">
+        <label for="qty-modal-input">Indica la cantidad deseada:</label>
+        <div class="stepper">
+          <button id="btn-qty-dec">-</button>
+          <input type="number" id="qty-modal-input" value="1" min="1">
+          <button id="btn-qty-inc">+</button>
+        </div>
+        <small id="qty-modal-max-stock-notice" class="max-stock-info"></small>
+      </div>
+
+      <p id="qty-modal-status-badge" class="calc-badge"></p>
+
+      <div class="calc-total-box">
+        <span>Total calculado:</span>
+        <strong id="qty-modal-total-price">$0</strong>
+      </div>
+
+      <button id="btn-confirm-add-cart" class="btn-action-submit">Confirmar y Agregar al Carrito</button>
+    </div>
+  </div>
+
+  <!-- MODAL CARRITO -->
+  <div id="modal-cart" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <button id="btn-close-cart-modal" class="close-x">&times;</button>
+      <h2>Tu Carrito de Compra</h2>
+
+      <div id="cart-items-list" class="cart-items-container"></div>
+
+      <div class="cart-summary-box">
+        <div>Unidades: <span id="cart-total-units">0</span></div>
+        <div class="grand-total">Total: <span id="cart-grand-total">$0</span></div>
+      </div>
+
+      <button id="btn-checkout-whatsapp" class="btn-whatsapp-send">Realizar Pedido por WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- PANEL DE ADMINISTRACIÓN -->
+  <div id="modal-admin-panel" class="modal-overlay hidden">
+    <div class="modal-box modal-extra-wide">
+      <button id="btn-close-admin-panel" class="close-x">&times;</button>
+
+      <!-- LOGIN -->
+      <div id="admin-login-view" class="admin-login-card">
+        <h2>Acceso Seguro Administrador</h2>
+        <form id="form-admin-login">
+          <input type="email" id="login-user" placeholder="Correo Administrador" required>
+          <input type="password" id="login-pass" placeholder="Contraseña" required>
+          <button type="submit" class="btn-action-submit">Ingresar al Panel</button>
+        </form>
+      </div>
+
+      <!-- DASHBOARD ADMIN -->
+      <div id="admin-dashboard-view" class="hidden">
+        <div class="dashboard-top-bar">
+          <h2>Panel de Control General</h2>
+          <button id="btn-logout-panel" class="btn-danger-outline">Cerrar Sesión</button>
+        </div>
+
+        <div class="admin-tabs-row">
+          <button class="tab-btn active" data-tab="tab-brand">1. Marca & Logo</button>
+          <button class="tab-btn" data-tab="tab-promos">2. Promos / Ofertas</button>
+          <button class="tab-btn" data-tab="tab-sections">3. Secciones y Menú URL</button>
+          <button class="tab-btn" data-tab="tab-products">4. Productos (Individual / Tanda)</button>
+          <button class="tab-btn" data-tab="tab-theme">5. Diseño & Colores</button>
+        </div>
+
+        <!-- PESTAÑA 1: MARCA -->
+        <div id="tab-brand" class="tab-content active">
+          <h3>Configuración de Identidad</h3>
+          <form id="form-admin-brand" class="grid-form">
+            <label>Título de la Tienda:</label>
+            <input type="text" id="adm-brand-title" required>
+
+            <label>URL del Logo (Imagen):</label>
+            <input type="url" id="adm-brand-logo-url" required>
+
+            <label>Mensaje / Anuncio Superior:</label>
+            <textarea id="adm-brand-announcement" rows="2"></textarea>
+
+            <label>Número WhatsApp para Recibir Pedidos (con código de país):</label>
+            <input type="text" id="adm-brand-whatsapp" required>
+
+            <label>URL Botón Dudas / Soporte:</label>
+            <input type="url" id="adm-brand-faq-url" required>
+
+            <button type="submit" class="btn-action-submit">Guardar Marca</button>
+          </form>
+        </div>
+
+        <!-- PESTAÑA 2: PROMOS -->
+        <div id="tab-promos" class="tab-content">
+          <h3>Crear Oferta Especial / Promo</h3>
+          <form id="form-admin-promo" class="grid-form">
+            <label>Título de la Promo:</label>
+            <input type="text" id="promo-title" required>
+
+            <label>Descripción:</label>
+            <textarea id="promo-desc" rows="2"></textarea>
+
+            <label>Precio Especial ($):</label>
+            <input type="number" step="0.01" id="promo-price" required>
+
+            <label>Validez / Vencimiento:</label>
+            <input type="text" id="promo-expiry" placeholder="ej. Válido hasta el 21/09" required>
+
+            <label>URLs de Imágenes (Separadas por coma para Carrusel):</label>
+            <textarea id="promo-images-urls" rows="3" placeholder="https://img1.com, https://img2.com" required></textarea>
+
+            <button type="submit" class="btn-action-submit">Publicar Oferta</button>
+          </form>
+
+          <div class="existing-list-wrapper">
+            <h4>Promos Activas</h4>
+            <div id="admin-promos-list" class="admin-data-list"></div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 3: SECCIONES Y ENLACES MENÚ EXTERNOS -->
+        <div id="tab-sections" class="tab-content">
+          <h3>Crear Sección o Enlace Externo para el Menú</h3>
+          <form id="form-admin-section" class="grid-form">
+            <input type="hidden" id="section-id-edit">
+            <label>Nombre del Botón / Sección:</label>
+            <input type="text" id="section-name" required>
+
+            <label>Tipo de Enlace:</label>
+            <select id="section-type">
+              <option value="internal">Sección Interna de Productos</option>
+              <option value="external">Redirección a URL Externa</option>
+            </select>
+
+            <label id="lbl-section-url" class="hidden">URL Externa Destino:</label>
+            <input type="url" id="section-external-url" class="hidden" placeholder="https://...">
+
+            <label>Número de Orden (1, 2, 3...):</label>
+            <input type="number" id="section-order" min="1" required>
+
+            <button type="submit" class="btn-action-submit">Guardar en Menú</button>
+          </form>
+
+          <div class="existing-list-wrapper">
+            <h4>Secciones y Botones del Menú Creados</h4>
+            <div id="admin-sections-list" class="admin-data-list"></div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 4: PRODUCTOS -->
+        <div id="tab-products" class="tab-content">
+          <div class="product-mode-switch">
+            <button id="btn-mode-single" class="sub-tab-btn active">Crear Producto Individual</button>
+            <button id="btn-mode-batch" class="sub-tab-btn">Crear Productos por Tanda (Masivo)</button>
+          </div>
+
+          <div id="form-single-product-container">
+            <form id="form-admin-single-product" class="grid-form">
+              <input type="hidden" id="single-prod-id">
+              
+              <label>Sección / Categoría de Destino:</label>
+              <select id="single-prod-section" required></select>
+
+              <label>Código del Producto:</label>
+              <input type="text" id="single-prod-code" required placeholder="ej. NS01">
+
+              <label>Título / Nombre:</label>
+              <input type="text" id="single-prod-title" required>
+
+              <label>Descripción:</label>
+              <textarea id="single-prod-desc" rows="2"></textarea>
+
+              <label>URL de Imagen:</label>
+              <input type="url" id="single-prod-img" required>
+
+              <label>Precio Minorista ($):</label>
+              <input type="number" step="0.01" id="single-prod-retail-price" required>
+
+              <label>Precio Mayorista ($):</label>
+              <input type="number" step="0.01" id="single-prod-wholesale-price" required>
+
+              <label>Cantidad mínima para Precio Mayorista:</label>
+              <input type="number" id="single-prod-wholesale-min" value="4" required>
+
+              <label>Stock Disponible:</label>
+              <input type="number" id="single-prod-stock-count" value="10" required>
+
+              <label>Estado Inicial de Stock:</label>
+              <select id="single-prod-stock-status">
+                <option value="available">Disponible</option>
+                <option value="out_of_stock">Agotado</option>
+              </select>
+
+              <button type="submit" class="btn-action-submit">Guardar Producto Individual</button>
+            </form>
+          </div>
+
+          <div id="form-batch-product-container" class="hidden">
+            <div class="batch-controls-header">
+              <label>Sección para la Tanda:</label>
+              <select id="batch-select-section" required></select>
+
+              <label>Prefijo del Código:</label>
+              <input type="text" id="batch-code-prefix" placeholder="ej. NS" required>
+
+              <label>Número Inicial:</label>
+              <input type="number" id="batch-code-start" value="1" min="1" required>
+
+              <label>Cantidad de Productos:</label>
+              <input type="number" id="batch-count-generate" value="3" min="1" max="20" required>
+
+              <button id="btn-generate-batch-rows" class="btn-secondary-action">Generar Filas</button>
+            </div>
+
+            <div class="batch-table-wrapper">
+              <table id="batch-table" class="batch-table">
+                <thead>
+                  <tr>
+                    <th>Cód.</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>P. Minorista</th>
+                    <th>P. Mayorista</th>
+                    <th>Min. Mayorista</th>
+                    <th>URL Imagen</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody id="batch-table-body"></tbody>
+              </table>
+            </div>
+
+            <button id="btn-save-batch-all" class="btn-action-submit hidden">Guardar Tanda Completa</button>
+          </div>
+
+          <div class="existing-list-wrapper">
+            <h4>Catálogo Actual</h4>
+            <div id="admin-products-list" class="admin-data-list"></div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 5: THEME -->
+        <div id="tab-theme" class="tab-content">
+          <h3>Personalización Estética Completa de la Tienda</h3>
+          <form id="form-admin-theme" class="grid-form">
+            <label>Color de Fondo de la Página:</label>
+            <input type="color" id="theme-color-bg" value="#0a0e17">
+
+            <label>URL Imagen Fondo (Opcional):</label>
+            <input type="url" id="theme-bg-img-url" placeholder="https://...">
+
+            <label>Color del Encabezado Superior:</label>
+            <input type="color" id="theme-color-header" value="#121824">
+
+            <label>Color de Barra Fija Inferior:</label>
+            <input type="color" id="theme-color-bottom-nav" value="#121824">
+
+            <label>Color Principal de Letras/Tipografía:</label>
+            <input type="color" id="theme-color-text" value="#f1f5f9">
+
+            <label>Color Tarjetas de Productos / Cuadros:</label>
+            <input type="color" id="theme-color-card-bg" value="#121824">
+
+            <label>Color Acento Principal (Botones / Neón):</label>
+            <input type="color" id="theme-color-accent" value="#06b6d4">
+
+            <button type="submit" class="btn-action-submit">Guardar y Aplicar Estilos</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="WEB.js"></script>
+</body>
+</html>

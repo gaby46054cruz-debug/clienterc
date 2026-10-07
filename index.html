@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargando... | Elementos de Competición</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes Robóticas/Mecánicas de Trazos Gruesos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700;1,900&family=Orbitron:wght@900&family=Rajdhani:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            /* REEMPLAZA ESTA URL CON LA IMAGEN DE FONDO QUE DESEES */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), url('https://iili.io/n1ODiog.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #000000;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+        }
+
+        .font-robot-heavy {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 900;
+        }
+
+        /* ESTILO METÁLICO CROMADO/PLATEADO GRUESO (Para la R) */
+        .metal-chrome-heavy {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F6 15%, #9CA3AF 35%, #1F2937 50%, #4B5563 65%, #D1D5DB 85%, #FFFFFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Efecto 3D metálico con bordes gruesos y sombra */
+            filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5))
+                    drop-shadow(3px 5px 0px #111827)
+                    drop-shadow(-2px -2px 0px #6B7280);
+        }
+
+        /* ESTILO METÁLICO TITANIO/NARANJA GRUESO (Para la Z) */
+        .metal-orange-heavy {
+            background: linear-gradient(180deg, #FFE0B2 0%, #FFB74D 15%, #FF5722 35%, #7F1D00 50%, #D84315 65%, #FF8A65 85%, #FFF3E0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Efecto 3D metálico con bordes gruesos y sombra */
+            filter: drop-shadow(0px 0px 15px rgba(255, 87, 34, 0.7))
+                    drop-shadow(3px 5px 0px #111827)
+                    drop-shadow(-2px -2px 0px #C2410C);
+        }
+
+        /* TEXTO METÁLICO EN EL TÍTULO INFERIOR */
+        .metal-text {
+            background: linear-gradient(180deg, #FFFFFF 0%, #9CA3AF 50%, #374151 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animación de carga de 5 segundos */
+        @keyframes fillBar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* Animación del haz de luz que recorre la barra */
+        @keyframes sweepLight {
+            0% { left: 0%; }
+            100% { left: 100%; }
+        }
+
+        .progress-fill {
+            animation: fillBar 5s linear forwards;
+        }
+
+        .light-glow {
+            animation: sweepLight 5s linear forwards;
+        }
+
+        /* Corte de esquina estilo tecnológico para el contenedor de la barra */
+        .tech-cut {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative">
+
+    <!-- Fondo de textura cibernética sobre la imagen -->
+    <div class="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="relative z-10 flex flex-col items-center justify-center px-4 w-full max-w-md text-center">
+        
+        <!-- LOGO RZ (Metálico Robótico Grueso) -->
+        <div class="flex items-center justify-center font-robot-heavy leading-none select-none mb-4 tracking-tighter">
+            <!-- Letra R: Metálica blanca/plateada gruesa, arriba -->
+            <span class="text-8xl md:text-9xl text-white metal-chrome-heavy -translate-y-4 transform italic uppercase">
+                R
+            </span>
+            <!-- Letra Z: Metálica naranja gruesa, a la par más abajo -->
+            <span class="text-8xl md:text-9xl text-orange-500 metal-orange-heavy translate-y-3 -ml-3 transform italic uppercase">
+                C
+            </span>
+        </div>
+
+        <!-- LEYENDA INFERIOR -->
+        <div class="mb-10 space-y-1">
+            <h1 class="text-xl md:text-2xl font-black uppercase tracking-[0.25em] metal-text font-robot-heavy">
+                ELEMENTOS DE COMPETICIÓN
+            </h1>
+            <p class="text-[10px] text-orange-500 font-mono tracking-[0.4em] uppercase font-bold">
+                High Performance Parts
+            </p>
+        </div>
+
+        <!-- BARRA DE CARGA CON LUZ (5 SEGUNDOS) -->
+        <div class="w-full max-w-xs space-y-2">
+            <div class="relative w-full h-3.5 bg-slate-950 border border-slate-700 tech-cut p-0.5 shadow-[0_0_20px_rgba(0,0,0,0.9)]">
+                
+                <!-- Barra de progreso -->
+                <div class="h-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-400 progress-fill relative"></div>
+                
+                <!-- Destello / Luz potente en el frente -->
+                <div class="absolute top-0 bottom-0 w-10 bg-white blur-sm opacity-90 light-glow -ml-5 pointer-events-none"></div>
+            </div>
+
+            <!-- PORCENTAJE Y ESTADO -->
+            <div class="flex justify-between items-center text-xs font-mono text-slate-400 font-bold px-1 uppercase tracking-wider">
+                <span class="flex items-center gap-1.5 text-[11px] text-gray-400">
+                    <span class="w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+                    CARGANDO SISTEMA...
+                </span>
+                <span id="counter" class="text-orange-500 font-black text-sm font-robot-heavy">0%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT DE REDIRECCIÓN Y CONTADOR -->
+    <script>
+        // CONFIGURA AQUÍ EL ARCHIVO O URL DE DESTINO
+        const PAGINA_DESTINO = "primero.html"; 
+
+        // TIEMPO TOTAL DE CARGA: 5 SEGUNDOS (5000 ms)
+        const TIEMPO_TOTAL = 5000;
+
+        const counterElement = document.getElementById('counter');
+        const startTime = Date.now();
+
+        // Incremento del porcentaje de 0% a 100%
+        const interval = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+            const progress = Math.min(Math.floor((elapsedTime / TIEMPO_TOTAL) * 100), 100);
+            
+            counterElement.textContent = `${progress}%`;
+
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+        }, 30);
+
+        // Redirección automática a los 5 segundos
+        setTimeout(() => {
+            window.location.href = PAGINA_DESTINO;
+        }, TIEMPO_TOTAL);
+    </script>
+</body>
+</html>
