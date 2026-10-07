@@ -32,6 +32,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// CONSTANTE MINIMO DE COMPRA
+const MINIMUM_ORDER_AMOUNT = 200000;
+
 // ESTADO GLOBAL
 let appSettings = {
   title: "NICO MOTOREPUESTOS",
@@ -93,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFirebaseAuth();
 });
 
-// INYECCIÓN DE ESTILOS Y ESTRUCTURA DEL 6TO BOTÓN / COMPONENTES
+// INYECCIÓN DE ESTILOS Y ESTRUCTURA
 function injectGlobalStylesAndComponents() {
   // Modal de zoom para imágenes
   if (!document.getElementById('image-zoom-modal')) {
@@ -117,7 +120,7 @@ function injectGlobalStylesAndComponents() {
     document.body.appendChild(zoomModal);
   }
 
-  // Hacer el logo principal ampliable al hacerle clic
+  // Hacer el logo principal ampliable
   if (siteLogo) {
     siteLogo.classList.add('clickable-img');
     siteLogo.title = "Haz clic para ampliar la imagen";
@@ -134,7 +137,7 @@ function injectGlobalStylesAndComponents() {
     searchContainer.innerHTML = `
       <div class="search-input-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="global-search-input" placeholder="Buscar productos en todas las secciones..." />
+        <input type="text" id="global-search-input" placeholder="Buscar productos..." />
         <button id="clear-search-btn" class="hidden" onclick="clearSearch()">✕</button>
       </div>
     `;
@@ -152,36 +155,43 @@ function injectGlobalStylesAndComponents() {
     });
   }
 
-  // CREACIÓN DEL 6TO BOTÓN INDEPENDIENTE PARA BOTONES DE MENÚ EN PANEL ADMIN
+  // AJUSTAR BOTONES EN PANEL ADMIN: RE-ESTRUCTURAR TAB 3 (SECCIONES) Y CREAR TAB 6 (BOTONES MENÚ)
   const tabContainer = document.querySelector('.admin-tabs');
-  if (tabContainer && !document.getElementById('tab-btn-custom-menu')) {
-    const menuTabBtn = document.createElement('button');
-    menuTabBtn.id = 'tab-btn-custom-menu';
-    menuTabBtn.className = 'tab-btn';
-    menuTabBtn.dataset.tab = 'tab-custom-menu';
-    menuTabBtn.textContent = '6. Menú Botones';
-    tabContainer.appendChild(menuTabBtn);
+  if (tabContainer) {
+    const tabs = tabContainer.querySelectorAll('.tab-btn');
+    if (tabs.length >= 3) {
+      tabs[2].textContent = '3. Secciones / Colecciones';
+    }
 
-    const menuTabContent = document.createElement('div');
-    menuTabContent.id = 'tab-custom-menu';
-    menuTabContent.className = 'tab-content';
-    menuTabContent.innerHTML = `
-      <h3>6. Crear Botones para el Menú Inferior</h3>
-      <p style="font-size:0.85rem; color:#888; margin-bottom:0.8rem;">Crea botones independientes que redirigen a URLs personalizadas cuando la persona abre el menú inferior.</p>
-      <form id="form-admin-custom-menu" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
-        <input type="hidden" id="custom-menu-id">
-        <label>Nombre del Botón:</label>
-        <input type="text" id="custom-menu-label" placeholder="Ej: Instagram / Ubicación" required>
-        <label>URL a donde direcciona:</label>
-        <input type="url" id="custom-menu-url" placeholder="https://..." required>
-        <button type="submit" class="btn-action-submit">Guardar Botón de Menú</button>
-      </form>
-      <div id="admin-custom-menu-list"></div>
-    `;
-    
-    const dashboardView = document.getElementById('admin-dashboard-view');
-    if (dashboardView) {
-      dashboardView.appendChild(menuTabContent);
+    if (!document.getElementById('tab-btn-custom-menu')) {
+      const menuTabBtn = document.createElement('button');
+      menuTabBtn.id = 'tab-btn-custom-menu';
+      menuTabBtn.className = 'tab-btn';
+      menuTabBtn.dataset.tab = 'tab-custom-menu';
+      menuTabBtn.textContent = '6. Menú Botones';
+      tabContainer.appendChild(menuTabBtn);
+
+      const menuTabContent = document.createElement('div');
+      menuTabContent.id = 'tab-custom-menu';
+      menuTabContent.className = 'tab-content';
+      menuTabContent.innerHTML = `
+        <h3>6. Crear Botones para el Menú Inferior</h3>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:0.8rem;">Crea botones independientes que redirigen a URLs personalizadas al abrir el menú.</p>
+        <form id="form-admin-custom-menu" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+          <input type="hidden" id="custom-menu-id">
+          <label>Nombre del Botón:</label>
+          <input type="text" id="custom-menu-label" placeholder="Ej: Ubicación / Instagram" required>
+          <label>URL a donde direcciona:</label>
+          <input type="url" id="custom-menu-url" placeholder="https://..." required>
+          <button type="submit" class="btn-action-submit">Guardar Botón de Menú</button>
+        </form>
+        <div id="admin-custom-menu-list"></div>
+      `;
+      
+      const dashboardView = document.getElementById('admin-dashboard-view');
+      if (dashboardView) {
+        dashboardView.appendChild(menuTabContent);
+      }
     }
   }
 
@@ -245,17 +255,9 @@ function injectGlobalStylesAndComponents() {
       transition: background 0.2s, transform 0.1s;
       box-shadow: 0 4px 10px rgba(6, 182, 212, 0.25);
     }
-    .btn-choose-qty:hover {
-      filter: brightness(1.1);
-    }
-    .btn-choose-qty:active {
-      transform: scale(0.98);
-    }
-    .btn-choose-qty:disabled {
-      background: #475569;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+    .btn-choose-qty:hover { filter: brightness(1.1); }
+    .btn-choose-qty:active { transform: scale(0.98); }
+    .btn-choose-qty:disabled { background: #475569; cursor: not-allowed; box-shadow: none; }
 
     .qty-picker-styled {
       display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0.8rem 0;
@@ -274,13 +276,28 @@ function injectGlobalStylesAndComponents() {
     .cart-item-styled {
       display: flex; justify-content: space-between; align-items: center; padding: 0.8rem;
       background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid rgba(255,255,255,0.05);
+      gap: 0.8rem;
+    }
+    .cart-item-img {
+      width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .cart-qty-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--theme-accent, #06b6d4);
+      color: #fff; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .cart-qty-btn:active { transform: scale(0.9); }
+    .min-amount-warning {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171;
+      padding: 0.75rem; border-radius: 8px; font-size: 0.88rem; text-align: center; margin-top: 1rem;
+      font-weight: 600;
     }
     .btn-whatsapp-styled {
       width: 100%; padding: 0.8rem; border-radius: 25px; border: none; background: #25d366;
       color: #fff; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: background 0.2s;
+      justify-content: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: background 0.2s, opacity 0.2s;
     }
     .btn-whatsapp-styled:hover { background: #1ebc57; }
+    .btn-whatsapp-styled:disabled { background: #475569; opacity: 0.6; cursor: not-allowed; box-shadow: none; }
     .search-badge-sec {
       display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px;
       background: rgba(6, 182, 212, 0.15); color: var(--theme-accent, #06b6d4); margin-bottom: 0.3rem; font-weight: 600;
@@ -289,7 +306,7 @@ function injectGlobalStylesAndComponents() {
   document.head.appendChild(style);
 }
 
-// ZOOM Y LIMPIEZA DE BÚSQUEDA
+// FUNCIONES DE ZOOM Y BÚSQUEDA
 window.openZoomModal = function(url) {
   if (!url) return;
   const modal = document.getElementById('image-zoom-modal');
@@ -377,7 +394,7 @@ function initListeners() {
     if (preloader) preloader.classList.add('hidden');
   });
 
-  // Secciones / Colecciones de productos
+  // Secciones
   onSnapshot(collection(db, "repuestos_secciones"), (snapshot) => {
     sectionsData = [];
     snapshot.forEach(d => sectionsData.push({ id: d.id, ...d.data() }));
@@ -403,7 +420,7 @@ function initListeners() {
     renderAdminPromosList();
   });
 
-  // Botones del menú desplegable
+  // Botones de Menú
   onSnapshot(collection(db, "repuestos_menu_botones"), (snapshot) => {
     customMenuButtons = [];
     snapshot.forEach(d => customMenuButtons.push({ id: d.id, ...d.data() }));
@@ -415,7 +432,13 @@ function initListeners() {
 function renderBrandAndTheme() {
   siteTitle.textContent = appSettings.title;
   siteLogo.src = appSettings.logoUrl;
-  siteAnnouncement.textContent = appSettings.announcement || "";
+  
+  if (siteAnnouncement) {
+    siteAnnouncement.textContent = appSettings.announcement || "";
+    // MODIFICACIÓN 2: Letra del mensaje/frase del logo en color negro
+    siteAnnouncement.style.setProperty('color', '#000000', 'important');
+  }
+
   document.getElementById('btn-bottom-faq').href = appSettings.faqUrl || "#";
   
   const creatorLink = document.getElementById('creator-wa-link');
@@ -442,7 +465,6 @@ function applyThemeStyles() {
 
 function renderSections() {
   sectionsBar.innerHTML = '';
-
   if (sectionsData.length === 0) return;
 
   if (!activeSectionId && sectionsData.length > 0) {
@@ -499,10 +521,8 @@ function renderProducts() {
       `<option value="${s.id}" ${s.id === p.sectionId ? 'selected' : ''}>${s.name}</option>`
     ).join('');
 
-    const wholesaleMinVal = p.wholesaleMin ? p.wholesaleMin : '';
-    const wholesaleText = p.wholesaleMin && Number(p.wholesaleMin) < 999999 
-      ? `Mayorista desde ${p.wholesaleMin} u.: $${Number(p.wholesalePrice).toLocaleString()}`
-      : `Precio Mayorista: $${Number(p.wholesalePrice).toLocaleString()}`;
+    // Toma el valor de precio único (compatibilidad con wholesalePrice / retailPrice)
+    const displayPrice = p.wholesalePrice ? Number(p.wholesalePrice) : (p.retailPrice ? Number(p.retailPrice) : 0);
 
     card.innerHTML = `
       <div class="product-img-box">
@@ -524,11 +544,15 @@ function renderProducts() {
         </div>
         <div>
           <div class="price-display">
-            <span class="retail-price">$${Number(p.retailPrice).toLocaleString()}</span>
-            <span class="wholesale-price">${wholesaleText}</span>
+            <span class="wholesale-price" style="font-size: 1.15rem; font-weight: 800; color: var(--gold-accent);">
+              $${displayPrice.toLocaleString()}
+            </span>
+            <span style="display:block; font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase;">
+              Precio Mayorista
+            </span>
           </div>
 
-          <div class="card-action-row">
+          <div class="card-action-row" style="margin-top:0.5rem;">
             <button class="btn-choose-qty" ${isOutOfStock ? 'disabled' : ''} onclick="openQuantityModal('${p.id}')">
               ${isOutOfStock ? 'Agotado' : 'Elegir Cantidad'}
             </button>
@@ -551,14 +575,8 @@ function renderProducts() {
           <label>URL Imagen:</label>
           <input type="url" id="inline-img-${p.id}" value="${p.imageUrl}">
 
-          <label>P. Minorista ($):</label>
-          <input type="number" step="0.01" id="inline-retail-${p.id}" value="${p.retailPrice}">
-
-          <label>P. Mayorista ($):</label>
-          <input type="number" step="0.01" id="inline-wholesale-${p.id}" value="${p.wholesalePrice}">
-
-          <label>Min. Mayorista (Opcional):</label>
-          <input type="number" id="inline-min-${p.id}" value="${wholesaleMinVal}" placeholder="Sin mínimo">
+          <label>Precio Mayorista ($):</label>
+          <input type="number" step="0.01" id="inline-price-${p.id}" value="${displayPrice}">
 
           <label>Stock Cantidad:</label>
           <input type="number" id="inline-stock-${p.id}" value="${p.stockCount}">
@@ -585,15 +603,15 @@ window.toggleInlineEdit = function(id) {
 
 window.saveInlineEdit = async function(id) {
   try {
-    const minVal = document.getElementById(`inline-min-${id}`).value;
+    const valPrice = parseFloat(document.getElementById(`inline-price-${id}`).value) || 0;
     const payload = {
       sectionId: document.getElementById(`inline-sec-${id}`).value,
       title: document.getElementById(`inline-title-${id}`).value,
       code: document.getElementById(`inline-code-${id}`).value,
       imageUrl: document.getElementById(`inline-img-${id}`).value,
-      retailPrice: parseFloat(document.getElementById(`inline-retail-${id}`).value) || 0,
-      wholesalePrice: parseFloat(document.getElementById(`inline-wholesale-${id}`).value) || 0,
-      wholesaleMin: minVal !== "" ? parseInt(minVal) : 999999,
+      retailPrice: valPrice,
+      wholesalePrice: valPrice,
+      wholesaleMin: 1,
       stockCount: parseInt(document.getElementById(`inline-stock-${id}`).value) || 0,
       stockStatus: document.getElementById(`inline-status-${id}`).value
     };
@@ -632,24 +650,26 @@ function renderPromos() {
   });
 }
 
-// 4. CANTIDADES Y CARRITO
+// 4. CANTIDADES Y CARRITO (UN SOLO PRECIO MAYORISTA)
 window.openQuantityModal = function(id) {
   selectedProductForModal = productsData.find(p => p.id === id);
   if (!selectedProductForModal) return;
 
   const maxStock = Number(selectedProductForModal.stockCount) || 0;
-  const wholesaleMin = Number(selectedProductForModal.wholesaleMin) || 999999;
+  const singlePrice = selectedProductForModal.wholesalePrice ? Number(selectedProductForModal.wholesalePrice) : Number(selectedProductForModal.retailPrice || 0);
 
   document.getElementById('qty-modal-title').textContent = selectedProductForModal.title;
   document.getElementById('qty-modal-desc').textContent = selectedProductForModal.desc || "";
-  document.getElementById('qty-modal-retail-price').textContent = `$${Number(selectedProductForModal.retailPrice).toLocaleString()}`;
+  
+  const retailPriceElem = document.getElementById('qty-modal-retail-price');
+  if (retailPriceElem) {
+    retailPriceElem.textContent = `$${singlePrice.toLocaleString()}`;
+  }
   
   const wholesaleInfo = document.getElementById('qty-modal-wholesale-info');
-  if (wholesaleMin < 999999) {
-    wholesaleInfo.textContent = `Mayorista: $${Number(selectedProductForModal.wholesalePrice).toLocaleString()} (Llevando ${wholesaleMin} u. o más)`;
+  if (wholesaleInfo) {
+    wholesaleInfo.textContent = `Precio Mayorista: $${singlePrice.toLocaleString()}`;
     wholesaleInfo.style.display = "block";
-  } else {
-    wholesaleInfo.style.display = "none";
   }
 
   document.getElementById('qty-modal-max-stock-notice').textContent = `Stock disponible: ${maxStock} unidades.`;
@@ -689,18 +709,13 @@ function updateQuantityModalCalculation() {
     input.value = maxStock;
   }
 
-  const wholesaleMin = Number(selectedProductForModal.wholesaleMin) || 999999;
-  const isWholesale = wholesaleMin < 999999 && qty >= wholesaleMin;
-  const unitPrice = isWholesale ? Number(selectedProductForModal.wholesalePrice) : Number(selectedProductForModal.retailPrice);
-  const total = qty * unitPrice;
+  const singlePrice = selectedProductForModal.wholesalePrice ? Number(selectedProductForModal.wholesalePrice) : Number(selectedProductForModal.retailPrice || 0);
+  const total = qty * singlePrice;
 
   const badge = document.getElementById('qty-modal-status-badge');
-  if (isWholesale) {
-    badge.textContent = `¡Aplica tarifa mayorista! ($${unitPrice.toLocaleString()} c/u)`;
+  if (badge) {
+    badge.textContent = `Precio Mayorista ($${singlePrice.toLocaleString()} c/u)`;
     badge.style.color = "var(--gold-accent)";
-  } else {
-    badge.textContent = `Tarifa minorista ($${unitPrice.toLocaleString()} c/u)`;
-    badge.style.color = "var(--theme-text)";
   }
 
   document.getElementById('qty-modal-total-price').textContent = `$${total.toLocaleString()}`;
@@ -717,6 +732,8 @@ function confirmAddToCart() {
     qty = maxStock;
   }
 
+  const singlePrice = selectedProductForModal.wholesalePrice ? Number(selectedProductForModal.wholesalePrice) : Number(selectedProductForModal.retailPrice || 0);
+
   const existingIndex = cart.findIndex(i => i.id === selectedProductForModal.id && !i.isPromo);
 
   if (existingIndex > -1) {
@@ -730,9 +747,8 @@ function confirmAddToCart() {
       id: selectedProductForModal.id,
       code: selectedProductForModal.code,
       title: selectedProductForModal.title,
-      retailPrice: Number(selectedProductForModal.retailPrice),
-      wholesalePrice: Number(selectedProductForModal.wholesalePrice),
-      wholesaleMin: Number(selectedProductForModal.wholesaleMin) || 999999,
+      imageUrl: selectedProductForModal.imageUrl || "https://via.placeholder.com/100",
+      price: singlePrice,
       maxStock: maxStock,
       qty: qty,
       isPromo: false
@@ -747,13 +763,14 @@ window.addPromoToCart = function(promoId) {
   const promo = promosData.find(p => p.id === promoId);
   if (!promo) return;
 
+  const images = promo.imageUrls ? promo.imageUrls.split(',').map(s => s.trim()) : [];
+
   cart.push({
     id: promo.id,
     code: "PROMO",
     title: promo.title,
-    retailPrice: Number(promo.price),
-    wholesalePrice: Number(promo.price),
-    wholesaleMin: 999999,
+    imageUrl: images[0] || "https://via.placeholder.com/100",
+    price: Number(promo.price),
     qty: 1,
     isPromo: true
   });
@@ -767,29 +784,56 @@ function updateCartBadge() {
   cartBadgeCount.textContent = totalUnits;
 }
 
+// MODIFICACIÓN 1: BARRA PARA AGREGAR O MERMAR DIRECTAMENTE DESDE EL CARRITO EN TIEMPO REAL
+window.changeCartItemQty = function(index, delta) {
+  const item = cart[index];
+  if (!item) return;
+
+  const newQty = item.qty + delta;
+
+  if (newQty <= 0) {
+    cart.splice(index, 1);
+  } else {
+    if (!item.isPromo && item.maxStock && newQty > item.maxStock) {
+      alert(`⚠️ El stock máximo disponible para este producto es de ${item.maxStock} unidades.`);
+      return;
+    }
+    item.qty = newQty;
+  }
+
+  updateCartBadge();
+  renderCartModal();
+};
+
+// RENDERIZAR CARRITO CON FOTOGRAFÍAS, BARRA DE CANTIDAD Y COMPROBACIÓN DE $200.000
 function renderCartModal() {
   cartItemsList.innerHTML = '';
   let units = 0;
   let total = 0;
 
   cart.forEach((item, index) => {
-    const isWholesale = !item.isPromo && item.qty >= item.wholesaleMin;
-    const price = isWholesale ? item.wholesalePrice : item.retailPrice;
-    const subtotal = item.qty * price;
-
+    const subtotal = item.qty * item.price;
     units += item.qty;
     total += subtotal;
 
     const div = document.createElement('div');
     div.className = 'cart-item-styled';
     div.innerHTML = `
-      <div>
-        <strong style="color:var(--theme-text); display:block; font-size:0.95rem;">${item.title}</strong>
-        <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-top:0.2rem;">Cód: ${item.code} | Cant: ${item.qty} x $${price.toLocaleString()}</div>
+      <div style="display:flex; align-items:center; gap:0.6rem; flex:1;">
+        <img src="${item.imageUrl}" alt="${item.title}" class="cart-item-img clickable-img" onclick="openZoomModal('${item.imageUrl}')" />
+        <div>
+          <strong style="color:var(--theme-text); display:block; font-size:0.9rem;">${item.title}</strong>
+          <div style="font-size:0.78rem; color:rgba(255,255,255,0.6); margin-top:0.1rem;">Cód: ${item.code} | $${item.price.toLocaleString()} c/u</div>
+        </div>
       </div>
-      <div style="display:flex; align-items:center; gap:0.8rem;">
-        <span style="font-weight:700; color:var(--theme-accent); font-size:1rem;">$${subtotal.toLocaleString()}</span>
-        <button onclick="removeFromCart(${index})" style="background:rgba(239, 68, 68, 0.2); border:none; color:#ef4444; width:28px; height:28px; border-radius:50%; cursor:pointer; font-weight:bold;">✕</button>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.3rem; background:rgba(255,255,255,0.05); padding:0.2rem 0.4rem; border-radius:15px; border:1px solid rgba(255,255,255,0.1);">
+          <button class="cart-qty-btn" onclick="changeCartItemQty(${index}, -1)" title="Restar cantidad">➖</button>
+          <span style="font-weight:bold; font-size:0.9rem; min-width:20px; text-align:center; color:var(--theme-text);">${item.qty}</span>
+          <button class="cart-qty-btn" onclick="changeCartItemQty(${index}, 1)" title="Sumar cantidad">➕</button>
+        </div>
+        <span style="font-weight:700; color:var(--theme-accent); font-size:0.95rem; min-width:70px; text-align:right;">$${subtotal.toLocaleString()}</span>
+        <button onclick="removeFromCart(${index})" style="background:rgba(239, 68, 68, 0.2); border:none; color:#ef4444; width:26px; height:26px; border-radius:50%; cursor:pointer; font-weight:bold;" title="Eliminar">✕</button>
       </div>
     `;
     cartItemsList.appendChild(div);
@@ -798,10 +842,36 @@ function renderCartModal() {
   cartTotalUnits.textContent = units;
   cartGrandTotal.textContent = `$${total.toLocaleString()}`;
 
+  // Eliminar cartel de aviso anterior si existía
+  const existingWarning = document.getElementById('min-amount-warning-box');
+  if (existingWarning) existingWarning.remove();
+
   const btnCheckout = document.getElementById('btn-checkout-whatsapp');
-  if (btnCheckout) {
-    btnCheckout.className = 'btn-whatsapp-styled';
-    btnCheckout.innerHTML = `💬 Realizar Pedido por WhatsApp`;
+  
+  if (total < MINIMUM_ORDER_AMOUNT) {
+    const missingAmount = MINIMUM_ORDER_AMOUNT - total;
+    
+    const warningBox = document.createElement('div');
+    warningBox.id = 'min-amount-warning-box';
+    warningBox.className = 'min-amount-warning';
+    warningBox.innerHTML = `
+      ⚠️ La compra mínima es de $${MINIMUM_ORDER_AMOUNT.toLocaleString()} pesos.<br>
+      Te faltan <strong>$${missingAmount.toLocaleString()}</strong> para poder realizar la compra.
+    `;
+    
+    cartItemsList.parentNode.insertBefore(warningBox, cartItemsList.nextSibling);
+
+    if (btnCheckout) {
+      btnCheckout.className = 'btn-whatsapp-styled';
+      btnCheckout.disabled = true;
+      btnCheckout.innerHTML = `💬 Mínimo de Compra No Alcanzado`;
+    }
+  } else {
+    if (btnCheckout) {
+      btnCheckout.className = 'btn-whatsapp-styled';
+      btnCheckout.disabled = false;
+      btnCheckout.innerHTML = `💬 Realizar Pedido por WhatsApp`;
+    }
   }
 }
 
@@ -814,11 +884,14 @@ window.removeFromCart = function(index) {
 async function checkoutWhatsapp() {
   if (cart.length === 0) return alert("El carrito está vacío.");
 
+  let currentTotal = cart.reduce((acc, item) => acc + (item.qty * item.price), 0);
+  if (currentTotal < MINIMUM_ORDER_AMOUNT) {
+    const missing = MINIMUM_ORDER_AMOUNT - currentTotal;
+    return alert(`⚠️ La compra mínima es de $${MINIMUM_ORDER_AMOUNT.toLocaleString()} pesos. Te faltan $${missing.toLocaleString()} para completar el pedido.`);
+  }
+
   try {
     await runTransaction(db, async (transaction) => {
-      // 1. PRIMERO: Realizar TODAS las lecturas
-      const updatesToPerform = [];
-
       for (const item of cart) {
         if (!item.isPromo) {
           const pRef = doc(db, "repuestos_productos", item.id);
@@ -831,21 +904,12 @@ async function checkoutWhatsapp() {
             }
 
             const newStock = Math.max(0, currentStock - item.qty);
-            updatesToPerform.push({
-              ref: pRef,
-              newStock: newStock,
+            transaction.update(pRef, {
+              stockCount: newStock,
               stockStatus: newStock <= 0 ? 'out_of_stock' : 'available'
             });
           }
         }
-      }
-
-      // 2. SEGUNDO: Realizar TODAS las escrituras
-      for (const updateObj of updatesToPerform) {
-        transaction.update(updateObj.ref, {
-          stockCount: updateObj.newStock,
-          stockStatus: updateObj.stockStatus
-        });
       }
 
       const transactionRef = doc(collection(db, "repuestos_transacciones"));
@@ -855,16 +919,14 @@ async function checkoutWhatsapp() {
       });
     });
 
-    let msg = `Hola *${appSettings.title}*, quiero solicitar este pedido:\n\n`;
+    let msg = `Hola *${appSettings.title}*, quiero solicitar este pedido por mayor:\n\n`;
     let grandTotal = 0;
 
     cart.forEach(item => {
-      const isWholesale = !item.isPromo && item.qty >= item.wholesaleMin;
-      const price = isWholesale ? item.wholesalePrice : item.retailPrice;
-      const subtotal = item.qty * price;
+      const subtotal = item.qty * item.price;
       grandTotal += subtotal;
 
-      msg += `• *Cód:* ${item.code} | ${item.title}\n  Cant: ${item.qty} u. | Unitario: $${price.toLocaleString()} | Subtotal: $${subtotal.toLocaleString()}\n\n`;
+      msg += `• *Cód:* ${item.code} | ${item.title}\n  Cant: ${item.qty} u. | Precio Mayorista: $${item.price.toLocaleString()} | Subtotal: $${subtotal.toLocaleString()}\n\n`;
     });
 
     msg += `*Total Unidades:* ${cart.reduce((a, b) => a + b.qty, 0)}\n`;
@@ -900,7 +962,7 @@ function setupUIEvents() {
   btnAdminLogout.addEventListener('click', logoutAction);
   document.getElementById('btn-logout-panel').addEventListener('click', logoutAction);
 
-  // Cambio de Pestañas del Panel Admin (Incluyendo el 6to Botón)
+  // Cambio de Pestañas del Panel Admin
   document.addEventListener('click', (e) => {
     if (e.target.classList.contains('tab-btn')) {
       const tabBtns = document.querySelectorAll('.tab-btn');
@@ -989,7 +1051,7 @@ function setupUIEvents() {
 
     document.getElementById('form-admin-section').reset();
     document.getElementById('section-id-edit').value = "";
-    alert("Colección / Sección guardada en la base de datos.");
+    alert("Sección guardada en la base de datos.");
   });
 
   // FORMULARIO EXCLUSIVO PARA EL 6TO BOTÓN (Menú Botones)
@@ -1029,10 +1091,11 @@ function setupUIEvents() {
     document.getElementById('form-single-product-container').classList.add('hidden');
   });
 
+  // Alta de Producto Individual (Solo Precio Mayorista)
   document.getElementById('form-admin-single-product').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('single-prod-id').value;
-    const wholesaleMinVal = document.getElementById('single-prod-wholesale-min').value;
+    const priceVal = parseFloat(document.getElementById('single-prod-wholesale-price').value || document.getElementById('single-prod-retail-price').value) || 0;
 
     const payload = {
       sectionId: document.getElementById('single-prod-section').value,
@@ -1040,10 +1103,10 @@ function setupUIEvents() {
       title: document.getElementById('single-prod-title').value,
       desc: document.getElementById('single-prod-desc').value,
       imageUrl: document.getElementById('single-prod-img').value,
-      retailPrice: parseFloat(document.getElementById('single-prod-retail-price').value),
-      wholesalePrice: parseFloat(document.getElementById('single-prod-wholesale-price').value),
-      wholesaleMin: wholesaleMinVal !== "" ? parseInt(wholesaleMinVal) : 999999,
-      stockCount: parseInt(document.getElementById('single-prod-stock-count').value),
+      retailPrice: priceVal,
+      wholesalePrice: priceVal,
+      wholesaleMin: 1,
+      stockCount: parseInt(document.getElementById('single-prod-stock-count').value) || 0,
       stockStatus: document.getElementById('single-prod-stock-status').value
     };
 
@@ -1055,7 +1118,7 @@ function setupUIEvents() {
 
     document.getElementById('form-admin-single-product').reset();
     document.getElementById('single-prod-id').value = "";
-    alert("Producto guardado.");
+    alert("Producto guardado exitosamente.");
   });
 
   // Generador Tanda
@@ -1076,9 +1139,7 @@ function setupUIEvents() {
         <td><input type="text" value="${code}" class="batch-code" readonly></td>
         <td><input type="text" placeholder="Título" class="batch-title"></td>
         <td><input type="text" placeholder="Desc" class="batch-desc"></td>
-        <td><input type="number" step="0.01" placeholder="P. Min" class="batch-retail"></td>
-        <td><input type="number" step="0.01" placeholder="P. May" class="batch-wholesale"></td>
-        <td><input type="number" placeholder="Opcional" class="batch-wholesale-min"></td>
+        <td><input type="number" step="0.01" placeholder="Precio ($)" class="batch-wholesale"></td>
         <td><input type="url" placeholder="https://..." class="batch-img"></td>
         <td><input type="number" value="10" class="batch-stock"></td>
       `;
@@ -1096,16 +1157,16 @@ function setupUIEvents() {
       const title = tr.querySelector('.batch-title').value;
       if (!title) continue;
 
-      const minVal = tr.querySelector('.batch-wholesale-min').value;
+      const priceVal = parseFloat(tr.querySelector('.batch-wholesale').value) || 0;
 
       const payload = {
         sectionId: sectionId,
         code: tr.querySelector('.batch-code').value,
         title: title,
         desc: tr.querySelector('.batch-desc').value,
-        retailPrice: parseFloat(tr.querySelector('.batch-retail').value) || 0,
-        wholesalePrice: parseFloat(tr.querySelector('.batch-wholesale').value) || 0,
-        wholesaleMin: minVal !== "" ? parseInt(minVal) : 999999,
+        retailPrice: priceVal,
+        wholesalePrice: priceVal,
+        wholesaleMin: 1,
         imageUrl: tr.querySelector('.batch-img').value || "https://via.placeholder.com/200",
         stockCount: parseInt(tr.querySelector('.batch-stock').value) || 10,
         stockStatus: 'available'
@@ -1229,7 +1290,7 @@ window.editSection = function(id, name, order) {
 };
 
 window.deleteSection = async function(id) {
-  if (confirm("¿Eliminar esta colección de productos?")) {
+  if (confirm("¿Eliminar esta sección de productos?")) {
     await deleteDoc(doc(db, "repuestos_secciones", id));
   }
 };
