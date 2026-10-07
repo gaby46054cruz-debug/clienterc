@@ -816,6 +816,9 @@ async function checkoutWhatsapp() {
 
   try {
     await runTransaction(db, async (transaction) => {
+      // 1. PRIMERO: Realizar TODAS las lecturas
+      const updatesToPerform = [];
+
       for (const item of cart) {
         if (!item.isPromo) {
           const pRef = doc(db, "repuestos_productos", item.id);
@@ -828,12 +831,21 @@ async function checkoutWhatsapp() {
             }
 
             const newStock = Math.max(0, currentStock - item.qty);
-            transaction.update(pRef, {
-              stockCount: newStock,
+            updatesToPerform.push({
+              ref: pRef,
+              newStock: newStock,
               stockStatus: newStock <= 0 ? 'out_of_stock' : 'available'
             });
           }
         }
+      }
+
+      // 2. SEGUNDO: Realizar TODAS las escrituras
+      for (const updateObj of updatesToPerform) {
+        transaction.update(updateObj.ref, {
+          stockCount: updateObj.newStock,
+          stockStatus: updateObj.stockStatus
+        });
       }
 
       const transactionRef = doc(collection(db, "repuestos_transacciones"));
