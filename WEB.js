@@ -1095,7 +1095,7 @@ function setupUIEvents() {
   document.getElementById('form-admin-single-product').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('single-prod-id').value;
-    const priceVal = parseFloat(document.getElementById('single-prod-wholesale-price').value || document.getElementById('single-prod-retail-price').value) || 0;
+    const priceVal = parseFloat(document.getElementById('single-prod-wholesale-price').value) || 0;
 
     const payload = {
       sectionId: document.getElementById('single-prod-section').value,
