@@ -58,8 +58,8 @@
   <!-- BARRA INFERIOR FIJA -->
   <nav id="bottom-fixed-nav" class="bottom-nav">
     <button id="btn-bottom-menu" class="nav-action">
-      <span class="icon"></span>
-      <span class="label"></span>
+      <span class="icon">☰</span>
+      <span class="label">SECCIONES - DATOS</span>
     </button>
 
     <button id="btn-bottom-cart" class="nav-action cart-center-btn">
@@ -68,7 +68,7 @@
 
     <a id="btn-bottom-faq" href="#" target="_blank" class="nav-action">
       <span class="icon">❓</span>
-      <span class="label">CONSULTAS</span>
+      <span class="label">CONTACTO - DUDAS</span>
     </a>
   </nav>
 
@@ -269,14 +269,8 @@
               <label>URL de Imagen:</label>
               <input type="url" id="single-prod-img" required>
 
-              <label>Precio Minorista ($):</label>
-              <input type="number" step="0.01" id="single-prod-retail-price" required>
-
-              <label>Precio Mayorista ($):</label>
+              <label>Precio ($):</label>
               <input type="number" step="0.01" id="single-prod-wholesale-price" required>
-
-              <label>Cantidad mínima para Precio Mayorista:</label>
-              <input type="number" id="single-prod-wholesale-min" value="4" required>
 
               <label>Stock Disponible:</label>
               <input type="number" id="single-prod-stock-count" value="10" required>
@@ -315,9 +309,7 @@
                     <th>Cód.</th>
                     <th>Título</th>
                     <th>Descripción</th>
-                    <th>P. Minorista</th>
-                    <th>P. Mayorista</th>
-                    <th>Min. Mayorista</th>
+                    <th>Precio ($)</th>
                     <th>URL Imagen</th>
                     <th>Stock</th>
                   </tr>
